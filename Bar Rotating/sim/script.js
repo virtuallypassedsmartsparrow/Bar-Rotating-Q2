@@ -282,7 +282,9 @@ function getShowVariables() {
         case "3":
             switch (page) {
                 case "10":
-                case "20": [];
+                case "20":
+                    return [];
+                    break;
                 case "30":
                     return ["w_1", "O_x_1"];
                     break;
