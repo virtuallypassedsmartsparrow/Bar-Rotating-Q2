@@ -1,0 +1,233 @@
+
+<!doctype= html>
+
+<html>
+<head>
+
+
+  <title>Bar Rotating</title>
+
+<body>
+
+<div style="float: left; padding-right: 20px;">
+	<p>L = <span id="sliderlength">4</span> m </p><input id="L" type="range" step="0.1" value="4" min="2" max="6" onInput="LengthChange(this.value)">
+	<p>b = <span id="slideroffset">0.5</span> m </p><input id="b" type="range" step="0.1" value="0.5" min="0" max="1" onInput="OffsetChange(this.value)"><br><br>
+
+<input type="button" value="Go" onclick="start_sim()"><br>
+</div>
+		<canvas id="myCanvas" width="600" height="500" style="border:1px solid #d3d3d3; float: left;"></canvas>
+  <script>
+
+function LengthChange(val) {
+	document.getElementById('sliderlength').innerHTML = val;
+}
+
+function OffsetChange(val) {
+	document.getElementById('slideroffset').innerHTML = val;
+}
+
+var myinterval;
+var dt = 0.005; // in seconds
+//scale is 50 pixles per meter
+var scale = 50
+var canvasheight = document.getElementById('myCanvas').height / scale //canvasheight in meters
+var canvaswidth = document.getElementById('myCanvas').width / scale // canvaswidth in meters
+
+//inputs and geometry
+var m;
+var L;
+var b;
+var t; //thickness of rod
+var x_0; //x position of center of mass
+var y_0; //y position of center of mass
+
+//properties of rod
+var I_G;
+var I_o;
+
+//initial movements
+var theta;
+var w;
+var alpha; 
+var a_x;
+var a_y;
+var v_x;
+var v_y;
+
+//reactions
+var O_x;
+var O_y;
+
+//timer
+var timer;
+
+function start_sim(){
+	clearInterval(myinterval);
+//inputs and geometry
+m = 0.1;
+L = Number(document.getElementById("L").value);
+b = Number(document.getElementById("b").value);
+t = 0.1; //thickness of rod
+x_0 = 0.5 * canvaswidth + b; //x position of center of mass
+y_0 = 0.5 * canvasheight; //y position of center of mass
+
+//properties of rod
+I_G = (1/12) * m * L * L;
+I_o = I_G + m * b * b;
+
+//initial movements
+theta = 0;
+w = 0;
+alpha = 0; 
+a_x = 0;
+a_y = 0;
+v_x = 0;
+v_y = 0;
+
+//reactions
+O_x = 0;
+O_y = 0;
+
+timer = 0;
+	myinterval = setInterval(function(){simulate_calcs()}, dt * 1000)
+}
+
+
+function simulate_calcs() {
+var ctx=getCanvas();
+
+
+
+
+ctx.clearRect(0,0,canvaswidth*scale,canvasheight*scale);
+
+	//timer
+	timer = timer + dt;
+	ctx.fillText("Timer: " + Math.round(timer*10)/10, scale*canvaswidth/2 - 45, 30);
+	ctx.font = "20px Arial"
+	ctx.closePath;
+	
+	//bar
+	drawRectangleSlant(x_0 - 0.5*L*Math.cos(theta) + 0.5*t*Math.sin(theta), y_0 - 0.5*L*Math.sin(theta) - 0.5*t*Math.cos(theta), L, t, theta);
+
+	//drawing Pin
+	drawBall(canvaswidth / 2, canvasheight / 2, t / 2);
+
+	//drawing reactions
+	drawArrowSmall(0.5 * canvaswidth - O_x,0.5 * canvasheight + O_y,0.5 * canvaswidth ,0.5 * canvasheight, 'blue');
+
+	//drawing gravity force
+	drawArrowSmall(x_0, y_0, x_0, y_0 + m * 9.81, 'green');
+
+	//rotation of bar
+	alpha = m * 9.81 * b * Math.cos(theta) / I_o;
+	w = w + alpha * dt;
+	theta = theta + w * dt;
+
+	x_0 = 0.5 * canvaswidth + b * Math.cos(theta);
+	y_0 =  0.5 * canvasheight + b * Math.sin(theta);
+
+	//Reactions
+	a_x = - 3 * m * 9.81 * b * b * Math.sin(theta) * Math.cos(theta) / I_o;
+	a_y = m * 9.81 * b * b * (-1 + 3 * Math.sin(theta) * Math.sin(theta)) / I_o;
+
+	O_x = m * a_x;
+	O_y = m * a_y + m * 9.81;
+
+}
+
+
+
+
+function getCanvas() {
+	var c = document.getElementById("myCanvas");
+	return c.getContext("2d");
+} 
+
+function drawRectangle( x, y, width, height) {
+	var ctx = getCanvas();
+	ctx.beginPath();
+	ctx.rect(x * scale, y * scale, width * scale, height * scale);
+	ctx.stroke();
+}
+
+function drawRectangleSlant(x1, y1, L, t, theta) {
+	var ctx = getCanvas();
+	ctx.beginPath();
+	var gr = ctx.createLinearGradient(scale * x1, scale * y1, scale * (x1 + L*Math.cos(theta)), scale * (y1 + L*Math.sin(theta)));
+	gr.addColorStop(0,'rgb(204,204,204)');
+	gr.addColorStop(0.5, 'rgb(191,191,191');
+	gr.addColorStop(1,'rgb(200,200,200)');
+	ctx.fillStyle = gr;
+
+	ctx.moveTo(scale * x1, scale * y1);
+	ctx.lineTo(scale * (x1 + L * Math.cos(theta)), scale * (y1 + L * Math.sin(theta)));
+	ctx.lineTo(scale * (x1 + L * Math.cos(theta) - t * Math.sin(theta)), scale * (y1 + L * Math.sin(theta) + t * Math.cos(theta)));
+	ctx.lineTo(scale * (x1 - t * Math.sin(theta)), scale * (y1 + t * Math.cos(theta)));
+	ctx.lineTo(scale * x1, scale * y1);
+	ctx.stroke();
+
+	ctx.fill();
+	ctx.closePath();
+}
+
+function drawLine(x1,y1,x2,y2) {
+	var ctx = getCanvas();
+	ctx.beginPath();
+	ctx.moveTo(x1 * scale,y1 * scale);
+	ctx.lineTo(x2 * scale,y2 * scale);
+	ctx.stroke();
+}
+
+function drawArrowLarge(x,y,x_tip,y_tip) {
+	var ctx = getCanvas();
+	var theta = Math.atan((y_tip - y) / (x_tip - x));
+	if (x_tip - x < 0) {
+    theta = theta + Math.PI;
+} else { 
+    theta = theta;
+}
+	ctx.beginPath();
+	ctx.moveTo(x * scale, y * scale);
+	ctx.lineTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.3 * Math.sin(0.25 * Math.PI - theta), scale*y_tip - scale*0.3 * Math.cos(0.25 * Math.PI - theta));
+	ctx.moveTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.3 * Math.cos(0.25 * Math.PI - theta), scale*y_tip + scale*0.3 * Math.sin(0.25 * Math.PI - theta));
+	ctx.stroke();
+}
+
+function drawArrowSmall(x,y,x_tip,y_tip,color) {
+	var ctx = getCanvas();
+
+	var gr = ctx.createLinearGradient(x,y,x_tip,y_tip);
+	gr.addColorStop(0,color);
+	gr.addColorStop(1,color);
+	ctx.strokeStyle = gr
+
+	var theta = Math.atan((y_tip - y) / (x_tip - x));
+		if (x_tip - x < 0) {
+	    theta = theta + Math.PI;
+	} else { 
+	    theta = theta;
+	}
+	ctx.beginPath();
+	ctx.moveTo(x * scale, y * scale);
+	ctx.lineTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.15 * Math.sin(Math.PI/3 - theta), scale*y_tip - scale*0.15 * Math.cos(Math.PI/3 - theta));
+	ctx.moveTo(x_tip * scale, y_tip * scale);
+	ctx.lineTo(scale*x_tip - scale*0.15 * Math.cos(Math.PI/6 - theta), scale*y_tip + scale*0.15 * Math.sin(Math.PI/6 - theta));
+	ctx.stroke();
+
+	ctx.closePath();
+}
+
+function drawBall(x1,y1,r) {
+	var ctx = getCanvas();
+	ctx.beginPath();
+	ctx.arc(x1 * scale,y1 * scale,r * scale,0,2*Math.PI);
+	ctx.stroke();
+}
+
+  </script>
+</body>
+</html>
