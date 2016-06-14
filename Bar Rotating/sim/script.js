@@ -43,7 +43,7 @@ var valuesRounded = {
 };
 
 var names = { //choose how to write variable string.
-    M: "m",
+    m: "m",
     L: "L",
     b: "b",
     I_G: "I<sub>G</sub>",
@@ -99,6 +99,7 @@ var model = new pipit.CapiAdapter.CapiModel({
     O_x_2: " ",
     O_y_2: " ",
     O_2: " ",
+    page: "10",
 });
 // I think this exposes the values to Smart Sparrow. :D
 pipit.CapiAdapter.expose('m', model);
@@ -116,6 +117,7 @@ pipit.CapiAdapter.expose('V_2', model);
 pipit.CapiAdapter.expose('O_x_2', model);
 pipit.CapiAdapter.expose('O_y_2', model);
 pipit.CapiAdapter.expose('O_2', model);
+pipit.CapiAdapter.expose('page', model);
 
 //this gets the values from Smart Sparrow. So does that mean I need to put inputs into Smart Sparrow variable tab? Either way, I'm sure these are just the inputs
 //I think I can place M R theta_deg in variables. Then make pages # in iniitial state. Then i'm done??!
@@ -133,9 +135,9 @@ model.on("change:b", function() {
 model.on("change:w_1", function() {
     draw();
 });
-// model.on("change:page", function() {
-//     draw();
-// });
+model.on("change:page", function() {
+     draw();
+});
 
 // This is JQuery right? 
 $("#selectBox").change(function() {
