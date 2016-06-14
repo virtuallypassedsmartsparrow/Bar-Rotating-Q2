@@ -226,7 +226,7 @@ function calculateVariables() {
     values.O_1 = values.O_y_1;
     values.alpha_1 = values.m * 9.81 * values.b / values.I_o;
     values.w_2 = Math.sqrt(2 * values.m * 9.81 * values.b / values.I_o);
-    values.V_2 = values.w_2 * values.b;
+    values.V_2 = values.w_2 * (values.b + values.L / 2);
     values.alpha_2 = 0;
     values.O_x_2 = 0;
     values.O_y_2 = values.m * 9.81 + values.m * values.b * values.w_2 * values.w_2;
