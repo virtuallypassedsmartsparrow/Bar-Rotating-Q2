@@ -317,10 +317,10 @@ function getShowVariables() {
                     return ["w_2"];
                     break;
                 case "80":
-                    return ["w_2", "alpha_2", "O_x_2"];
+                    return ["w_2", "V_2", "alpha_2", "O_x_2"];
                     break;
                 case "90":
-                    return ["w_2", "alpha_2", "O_x_2", "O_y_2"];
+                    return ["w_2", "V_2", "alpha_2", "O_x_2", "O_y_2"];
                     break;
 
             }
