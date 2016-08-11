@@ -7,15 +7,14 @@
 
   <title>Bar Rotating</title>
 
-<body>
+<body onload="start_sim()">
 
 <div style="float: left; padding-right: 20px;">
-	<p>L = <span id="sliderlength">4</span> m </p><input id="L" type="range" step="0.1" value="4" min="2" max="6" onInput="LengthChange(this.value)">
-	<p>b = <span id="slideroffset">0.5</span> m </p><input id="b" type="range" step="0.1" value="0.5" min="0" max="1" onInput="OffsetChange(this.value)"><br><br>
+	<p>L = <span id="sliderlength">4</span> m </p><input id="L" type="range" step="0.1" value="4" min="2" max="5" onInput="LengthChange(this.value)" onmouseup="start_sim()">
+	<p>b = <span id="slideroffset">0.5</span> m </p><input id="b" type="range" step="0.1" value="0.5" min="0" max="1" onInput="OffsetChange(this.value)" onmouseup="start_sim()"><br><br>
 
-<input type="button" value="Go" onclick="start_sim()"><br>
 </div>
-		<canvas id="myCanvas" width="600" height="500" style="border:1px solid #d3d3d3; float: left;"></canvas>
+		<canvas id="myCanvas" width="502" height="350" style="border:1px solid #d3d3d3; float: left;"></canvas>
   <script>
 
 function LengthChange(val) {
@@ -25,6 +24,8 @@ function LengthChange(val) {
 function OffsetChange(val) {
 	document.getElementById('slideroffset').innerHTML = val;
 }
+
+var ctx = getCanvas();
 
 var myinterval;
 var dt = 0.005; // in seconds
@@ -101,12 +102,18 @@ var ctx=getCanvas();
 
 ctx.clearRect(0,0,canvaswidth*scale,canvasheight*scale);
 
-	//timer
-	timer = timer + dt;
-	ctx.fillText("Timer: " + Math.round(timer*10)/10, scale*canvaswidth/2 - 45, 30);
-	ctx.font = "20px Arial"
-	ctx.closePath;
-	
+	timer = timer + dt; 
+	ctx.font = '20px Calibri';
+	ctx.fillStyle = 'black';
+	ctx.fillText("Time: " + Math.round(timer*10)/10 + " s", 10, 30);
+	ctx.fill();
+
+	// //timer
+	// timer = timer + dt;
+	// ctx.fillText("Timer: " + Math.round(timer*10)/10, scale*canvaswidth/2 - 45, 30);
+	// ctx.font = "20px Arial"
+	// ctx.closePath;
+
 	//bar
 	drawRectangleSlant(x_0 - 0.5*L*Math.cos(theta) + 0.5*t*Math.sin(theta), y_0 - 0.5*L*Math.sin(theta) - 0.5*t*Math.cos(theta), L, t, theta);
 
@@ -118,6 +125,10 @@ ctx.clearRect(0,0,canvaswidth*scale,canvasheight*scale);
 
 	//drawing gravity force
 	drawArrowSmall(x_0, y_0, x_0, y_0 + m * 9.81, 'green');
+
+	//this stops the fill from the next from affecting the last draw arrow for some reason. 
+	ctx.beginPath();
+
 
 	//rotation of bar
 	alpha = m * 9.81 * b * Math.cos(theta) / I_o;
@@ -145,14 +156,14 @@ function getCanvas() {
 } 
 
 function drawRectangle( x, y, width, height) {
-	var ctx = getCanvas();
+
 	ctx.beginPath();
 	ctx.rect(x * scale, y * scale, width * scale, height * scale);
 	ctx.stroke();
 }
 
 function drawRectangleSlant(x1, y1, L, t, theta) {
-	var ctx = getCanvas();
+
 	ctx.beginPath();
 	var gr = ctx.createLinearGradient(scale * x1, scale * y1, scale * (x1 + L*Math.cos(theta)), scale * (y1 + L*Math.sin(theta)));
 	gr.addColorStop(0,'rgb(204,204,204)');
@@ -172,7 +183,7 @@ function drawRectangleSlant(x1, y1, L, t, theta) {
 }
 
 function drawLine(x1,y1,x2,y2) {
-	var ctx = getCanvas();
+
 	ctx.beginPath();
 	ctx.moveTo(x1 * scale,y1 * scale);
 	ctx.lineTo(x2 * scale,y2 * scale);
@@ -180,7 +191,7 @@ function drawLine(x1,y1,x2,y2) {
 }
 
 function drawArrowLarge(x,y,x_tip,y_tip) {
-	var ctx = getCanvas();
+
 	var theta = Math.atan((y_tip - y) / (x_tip - x));
 	if (x_tip - x < 0) {
     theta = theta + Math.PI;
@@ -197,12 +208,13 @@ function drawArrowLarge(x,y,x_tip,y_tip) {
 }
 
 function drawArrowSmall(x,y,x_tip,y_tip,color) {
-	var ctx = getCanvas();
 
-	var gr = ctx.createLinearGradient(x,y,x_tip,y_tip);
-	gr.addColorStop(0,color);
-	gr.addColorStop(1,color);
-	ctx.strokeStyle = gr
+	// var gr = ctx.createLinearGradient(x,y,x_tip,y_tip);
+	// gr.addColorStop(0,color);
+	// gr.addColorStop(1,color);
+	//ctx.strokeStyle = gr
+
+	ctx.strokeStyle = color;
 
 	var theta = Math.atan((y_tip - y) / (x_tip - x));
 		if (x_tip - x < 0) {
@@ -216,13 +228,12 @@ function drawArrowSmall(x,y,x_tip,y_tip,color) {
 	ctx.lineTo(scale*x_tip - scale*0.15 * Math.sin(Math.PI/3 - theta), scale*y_tip - scale*0.15 * Math.cos(Math.PI/3 - theta));
 	ctx.moveTo(x_tip * scale, y_tip * scale);
 	ctx.lineTo(scale*x_tip - scale*0.15 * Math.cos(Math.PI/6 - theta), scale*y_tip + scale*0.15 * Math.sin(Math.PI/6 - theta));
-	ctx.stroke();
-
 	ctx.closePath();
+	ctx.stroke();
 }
 
 function drawBall(x1,y1,r) {
-	var ctx = getCanvas();
+
 	ctx.beginPath();
 	ctx.arc(x1 * scale,y1 * scale,r * scale,0,2*Math.PI);
 	ctx.stroke();
