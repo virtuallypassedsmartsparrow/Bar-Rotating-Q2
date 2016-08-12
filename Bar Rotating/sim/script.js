@@ -329,6 +329,8 @@ function getShowVariables() {
                     return [];
                     break;
                 case "60":
+                    return ["w_2"];
+                    break;
                 case "70":
                     return ["w_2", "V_2"];
                     break;
