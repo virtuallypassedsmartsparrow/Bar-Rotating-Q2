@@ -330,7 +330,7 @@ function getShowVariables() {
                     break;
                 case "60":
                 case "70":
-                    return ["w_2"];
+                    return ["w_2", "V_2"];
                     break;
                 case "80":
                     return ["w_2", "V_2", "alpha_2", "O_x_2"];
