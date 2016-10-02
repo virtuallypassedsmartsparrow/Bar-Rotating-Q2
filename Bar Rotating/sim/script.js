@@ -480,16 +480,12 @@ function round(input) {
         return input;
     }
 
-    if (input > 0) {
-        var position = 0;
-        var i = input;
-        while (i < 1000) { // show 3 sig figs
-            i *= 10;
-            position++;
-        }
-        input = Math.round(i) / Math.pow(10, position);
+    //rounds if not an integer or NaN or "" or 0
+    var i = Math.abs(input);
+    var sigfig = 3
+    var mag = Math.floor(Math.log10(i));
+    input = input * Math.pow(10, sigfig - mag);
+    input = Math.round(input)
+    input = input / Math.pow(10, sigfig - mag);
         return input;
-    }
-    
-    return input;
 }
